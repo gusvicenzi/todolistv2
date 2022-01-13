@@ -44,13 +44,15 @@ const listSchema = new mongoose.Schema({
 });
 
 const List = mongoose.model("List", listSchema);
+
+var firstRun = 1;
 // _________________________________________________
 
 app.get("/", function (req, res) {
   const day = date.getDate();
   // get Mongodb data
   Item.find({}, function (err, foundItems) {
-    if (foundItems.length === 0) {
+    if (foundItems.length === 0 && firstRun === 1) {
       // insert defaultItems to items collection
       Item.insertMany(defaultItems, function (err) {
         if (err) {
@@ -59,6 +61,7 @@ app.get("/", function (req, res) {
           console.log("Default items added to database");
         }
       });
+      firstRun = 0;
       res.redirect("/");
     } else {
       // mongoose.connection.close();
