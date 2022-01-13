@@ -38,24 +38,24 @@ const item3 = new Item({
 
 const defaultItems = [item1, item2, item3];
 
-// Item.insertMany(defaultItems, function (err) {
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     console.log("Default items added to database");
-//   }
-// });
-
 // _________________________________________________
 
 app.get("/", function (req, res) {
   const day = date.getDate();
-
+  // get Mongodb data
   Item.find({}, function (err, foundItems) {
-    if (err) {
-      console.log(err);
+    if (foundItems.length === 0) {
+      // insert defaultItems to items collection
+      Item.insertMany(defaultItems, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Default items added to database");
+        }
+      });
+      res.redirect("/");
     } else {
-      mongoose.connection.close();
+      // mongoose.connection.close();
       res.render("list", { listTitle: day, newListItems: foundItems });
       foundItems.forEach(function (foundItem) {
         console.log(foundItem.name);
@@ -65,18 +65,29 @@ app.get("/", function (req, res) {
 });
 
 app.post("/", function (req, res) {
-  const item = req.body.newItem;
-  if (req.body.list === "Work") {
-    if (item != "") {
-      workItems.push(item);
-    }
-    res.redirect("/work");
-  } else {
-    if (item != "") {
-      items.push(item);
-    }
-    res.redirect("/");
+  const itemName = req.body.newItem;
+
+  const item = new Item({
+    name: itemName,
+  });
+
+  if (itemName != "") {
+    item.save();
   }
+  res.redirect("/");
+});
+
+app.post("/delete", function (req, res) {
+  const checkedItemId = req.body.checkbox;
+  console.log(checkedItemId);
+  Item.findByIdAndRemove({ _id: checkedItemId }, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Item deleted: " + checkedItemId);
+      res.redirect("/");
+    }
+  });
 });
 
 app.get("/work", function (req, res) {
