@@ -14,7 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 // Creating the mongo database using mongoose
-const url = "mongodb://localhost:27017/todolistDB";
+const url =
+  "mongodb+srv://admin-gustavo:Test123@cluster0.er9gn.mongodb.net/todolistDB";
 mongoose.connect(url);
 
 const itemsSchema = new mongoose.Schema({
