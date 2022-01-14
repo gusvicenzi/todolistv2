@@ -3,7 +3,6 @@ const date = require(__dirname + "/date.js");
 const mongoose = require("mongoose");
 const _ = require("lodash");
 
-const port = 3000;
 const app = express();
 
 // const items = ["Buy food", "Cook food", "Eat food"];
@@ -166,6 +165,11 @@ app.get("/about", function (req, res) {
   res.render("about");
 });
 
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
 app.listen(port, function () {
-  console.log("Server runing on port " + port);
+  console.log("Server has started successfully " + port);
 });
