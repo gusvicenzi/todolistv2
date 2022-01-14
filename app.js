@@ -74,31 +74,35 @@ app.get("/", function (req, res) {
 });
 
 app.post("/", function (req, res) {
+  const day = date.getDate();
   const itemName = req.body.newItem;
+  const listName = req.body.list;
 
   const item = new Item({
     name: itemName,
   });
 
-  if (itemName != "") {
-    item.save();
-  }
-  res.redirect("/");
-});
-
-app.post("/delete", function (req, res) {
-  const checkedItemId = req.body.checkbox;
-  console.log(checkedItemId);
-  Item.findByIdAndRemove({ _id: checkedItemId }, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Item deleted: " + checkedItemId);
+  if (itemName) {
+    if (listName === day) {
+      item.save();
       res.redirect("/");
+    } else {
+      List.findOne({ name: listName }, function (err, foundList) {
+        foundList.items.push(item);
+        foundList.save();
+        res.redirect("/" + listName);
+      });
     }
-  });
+  } else {
+    if (listName === day) {
+      res.redirect("/");
+    } else {
+      res.redirect("/" + listName);
+    }
+  }
 });
 
+// custom lists
 app.get("/:customListName", function (req, res) {
   const customListName = req.params.customListName;
 
@@ -111,6 +115,7 @@ app.get("/:customListName", function (req, res) {
           newListItems: foundList.items,
         });
       } else {
+        // create new list with default items
         const list = new List({
           name: customListName,
           items: defaultItems,
@@ -125,12 +130,18 @@ app.get("/:customListName", function (req, res) {
   });
 });
 
-app.post("/work", function (req, res) {
-  const item = req.body.newItem;
-  if (item != "") {
-    workItems.push(item);
-  }
-  res.redirect("/work");
+// delete item
+app.post("/delete", function (req, res) {
+  const checkedItemId = req.body.checkbox;
+  console.log(checkedItemId);
+  Item.findByIdAndRemove({ _id: checkedItemId }, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Item deleted: " + checkedItemId);
+      res.redirect("/");
+    }
+  });
 });
 
 app.get("/about", function (req, res) {
